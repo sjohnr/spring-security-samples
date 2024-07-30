@@ -1,0 +1,27 @@
+= OAuth 2.0 RestClient Sample
+
+This sample demonstrates making protected resources requests with `RestClient` via an interceptor that adds the `Authorization` header to each request.
+
+== 1. Running the tests
+
+TODO
+
+== 2. Running the app with Spring Authorization Server
+
+Before running this application with the default configuration, you will need to start up an Authorization Server, such as the https://github.com/spring-projects/spring-security-samples/tree/main/servlet/spring-boot/java/oauth2/authorization-server[authorization-server sample] in this project which is pre-configured to work with this OAuth2 RestClient Sample out of the box.
+
+To run the Authorization Server as a stand-alone application, navigate to `servlet/spring-boot/java/oauth2/authorization-server` and do:
+
+```bash
+./gradlew bootRun
+```
+
+Or import the project into your IDE and run `OAuth2AuthorizationServerApplication` from there. Next, you can run this sample.
+
+To run as a stand-alone application, do:
+
+```bash
+./gradlew bootRun
+```
+
+Or import the project into your IDE and run `OAuth2HttpClientApplication` from there. Once the application is running, visit http://127.0.0.1:8080[127.0.0.1:8080] in your browser to try out the sample.
