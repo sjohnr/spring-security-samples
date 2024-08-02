@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.security: trace
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          messaging-client:
+            client-name: "Messaging Client"
+            client-id: "messaging-client"
+            client-secret: "secret"
+            provider: "spring"
+            scope:
+              - "message:read"
+              - "message:write"
+            redirect-uri: "{baseUrl}/authorized"
+            client-authentication-method: "client_secret_basic"
+            authorization-grant-type: "client_credentials"
+        provider:
+          spring:
+            issuer-uri: "http://localhost:9000"
