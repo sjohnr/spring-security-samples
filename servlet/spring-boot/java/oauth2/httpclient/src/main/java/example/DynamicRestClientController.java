@@ -17,8 +17,6 @@
 package example;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
@@ -28,56 +26,42 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestClient;
 
+import static org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor.clientRegistrationId;
+
 /**
  * @author Steve Riesenberg
  */
 @Controller
-public class PerRequestRestClientController {
-
-	private final OAuth2AuthorizedClientManager authorizedClientManager;
-
-	private final OAuth2AuthorizedClientRepository authorizedClientRepository;
+public class DynamicRestClientController {
 
 	private final RestClient restClient;
 
-	public PerRequestRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
+	public DynamicRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
 			OAuth2AuthorizedClientRepository authorizedClientRepository,
 			@Value("${mockwebserver.url}") String baseUrl) {
 
-		this.authorizedClientManager = authorizedClientManager;
-		this.authorizedClientRepository = authorizedClientRepository;
-		this.restClient = RestClient.create(baseUrl);
+		OAuth2ClientHttpRequestInterceptor requestInterceptor =
+			new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
+		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
 	}
 
-	@GetMapping(value = {"/authenticated/per-request/messages", "/public/per-request/messages"})
+	@GetMapping(value = {"/authenticated/dynamic/messages", "/public/dynamic/messages"})
 	public String getMessages(Authentication authentication, Model model) {
-		OAuth2ClientHttpRequestInterceptor requestInterceptor = createRequestInterceptor(authentication);
+		String clientRegistrationId = resolveClientRegistrationId(authentication);
 		// @formatter:off
 		Message[] messages = this.restClient.get()
 			.uri("/api/v1/messages")
-			.httpRequest(requestInterceptor.httpRequest())
+			.attributes(clientRegistrationId(clientRegistrationId))
 			.retrieve()
-			.onStatus(requestInterceptor.errorHandler())
 			.body(Message[].class);
 		// @formatter:on
 		model.addAttribute("messages", messages);
 		return "messages";
 	}
 
-	private OAuth2ClientHttpRequestInterceptor createRequestInterceptor(Authentication authentication) {
-		String clientRegistrationId;
-		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-			clientRegistrationId = "messaging-client";
-		}
-		else {
-			clientRegistrationId = "login-client";
-		}
-
-		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
-			this.authorizedClientManager, clientRegistrationId);
-		requestInterceptor.setAuthorizedClientRepository(this.authorizedClientRepository);
-
-		return requestInterceptor;
+	private String resolveClientRegistrationId(Authentication authentication) {
+		return (authentication == null) ? "messaging-client" : "login-client";
 	}
 
 	public record Message(String message) {

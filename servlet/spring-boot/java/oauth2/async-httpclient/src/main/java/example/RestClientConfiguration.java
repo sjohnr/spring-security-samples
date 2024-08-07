@@ -55,7 +55,8 @@ public class RestClientConfiguration {
 			OAuth2AuthorizedClientRepository authorizedClientRepository) {
 
 		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
-				authorizedClientManager, CLIENT_REGISTRATION_ID);
+				authorizedClientManager);
+		requestInterceptor.setDefaultClientRegistrationId(CLIENT_REGISTRATION_ID);
 		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
 
 		return builder.baseUrl(this.baseUrl).requestInterceptor(requestInterceptor).build();

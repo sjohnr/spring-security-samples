@@ -16,6 +16,10 @@
 
 package example;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +29,21 @@ import org.springframework.web.client.RestClient;
  * @author Steve Riesenberg
  */
 @Controller
-public class RestClientController {
+public class ImplicitRestClientController {
 
 	private final RestClient restClient;
 
-	public RestClientController(RestClient restClient) {
-		this.restClient = restClient;
+	public ImplicitRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
+			OAuth2AuthorizedClientRepository authorizedClientRepository,
+			@Value("${mockwebserver.url}") String baseUrl) {
+
+		OAuth2ClientHttpRequestInterceptor requestInterceptor =
+			new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
+		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
 	}
 
-	@GetMapping(value = {"/authenticated/messages", "/public/messages"})
+	@GetMapping("/authenticated/implicit/messages")
 	public String getMessages(Model model) {
 		// @formatter:off
 		Message[] messages = this.restClient.get()

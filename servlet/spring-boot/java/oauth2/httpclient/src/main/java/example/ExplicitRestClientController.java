@@ -17,36 +17,48 @@
 package example;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestClient;
 
 /**
  * @author Steve Riesenberg
  */
-@Configuration
-public class RestClientConfiguration {
+@Controller
+public class ExplicitRestClientController {
 
 	private static final String CLIENT_REGISTRATION_ID = "messaging-client";
 
-	private final String baseUrl;
+	private final RestClient restClient;
 
-	public RestClientConfiguration(@Value("${mockwebserver.url}") String baseUrl) {
-		this.baseUrl = baseUrl;
+	public ExplicitRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
+			OAuth2AuthorizedClientRepository authorizedClientRepository,
+			@Value("${mockwebserver.url}") String baseUrl) {
+
+		OAuth2ClientHttpRequestInterceptor requestInterceptor =
+			new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+		requestInterceptor.setDefaultClientRegistrationId(CLIENT_REGISTRATION_ID);
+		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
+		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
 	}
 
-	@Bean
-	public RestClient restClient(RestClient.Builder builder, OAuth2AuthorizedClientManager authorizedClientManager,
-			OAuth2AuthorizedClientRepository authorizedClientRepository) {
+	@GetMapping(value = {"/authenticated/explicit/messages", "/public/explicit/messages"})
+	public String getMessages(Model model) {
+		// @formatter:off
+		Message[] messages = this.restClient.get()
+			.uri("/api/v1/messages")
+			.retrieve()
+			.body(Message[].class);
+		// @formatter:on
+		model.addAttribute("messages", messages);
+		return "messages";
+	}
 
-		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
-				authorizedClientManager, CLIENT_REGISTRATION_ID);
-		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
-
-		return builder.baseUrl(this.baseUrl).requestInterceptor(requestInterceptor).build();
+	public record Message(String message) {
 	}
 
 }
