@@ -39,7 +39,7 @@ public class SecurityConfiguration {
 		// @formatter:off
 		http
 			.authorizeHttpRequests((authorize) -> authorize
-				.requestMatchers("/", "/public/**").permitAll()
+				.requestMatchers("/", "/public/**", "/error").permitAll()
 				.anyRequest().authenticated()
 			)
 			.formLogin(Customizer.withDefaults())

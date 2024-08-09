@@ -39,11 +39,12 @@ public class ImplicitRestClientController {
 
 		OAuth2ClientHttpRequestInterceptor requestInterceptor =
 			new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+		requestInterceptor.setUseAuthenticatedClientRegistrationId(true);
 		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
 		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
 	}
 
-	@GetMapping("/authenticated/implicit/messages")
+	@GetMapping(value = {"/authenticated/implicit/messages", "/public/implicit/messages"})
 	public String getMessages(Model model) {
 		// @formatter:off
 		Message[] messages = this.restClient.get()
