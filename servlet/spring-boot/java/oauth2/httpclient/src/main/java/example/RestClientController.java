@@ -16,39 +16,33 @@
 
 package example;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestClient;
 
+import static org.springframework.security.oauth2.client.web.function.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId;
+
 /**
  * @author Steve Riesenberg
  */
 @Controller
-public class ImplicitRestClientController {
+public class RestClientController {
+
+	private static final String CLIENT_REGISTRATION_ID = "messaging-client";
 
 	private final RestClient restClient;
 
-	public ImplicitRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
-			OAuth2AuthorizedClientRepository authorizedClientRepository,
-			@Value("${mockwebserver.url}") String baseUrl) {
-
-		OAuth2ClientHttpRequestInterceptor requestInterceptor =
-			new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
-		requestInterceptor.setUseAuthenticatedClientRegistrationId(true);
-		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
-		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
+	public RestClientController(RestClient restClient) {
+		this.restClient = restClient;
 	}
 
-	@GetMapping(value = {"/authenticated/implicit/messages", "/public/implicit/messages"})
+	@GetMapping(value = { "/messages", "/public/messages" })
 	public String getMessages(Model model) {
 		// @formatter:off
 		Message[] messages = this.restClient.get()
 			.uri("/api/v1/messages")
+			.attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
 			.retrieve()
 			.body(Message[].class);
 		// @formatter:on

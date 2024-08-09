@@ -21,6 +21,19 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             client-authentication-method: "client_secret_basic"
             authorization-grant-type: "authorization_code"
+          login-client-with-messaging:
+            client-name: "Login Client with Messaging"
+            client-id: "login-client"
+            client-secret: "openid-connect"
+            provider: "spring"
+            scope:
+              - "openid"
+              - "profile"
+              - "message:read"
+              - "message:write"
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-authentication-method: "client_secret_basic"
+            authorization-grant-type: "authorization_code"
           messaging-client:
             client-name: "Messaging Client"
             client-id: "messaging-client"
