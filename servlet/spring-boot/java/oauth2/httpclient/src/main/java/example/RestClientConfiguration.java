@@ -36,7 +36,7 @@ public class RestClientConfiguration {
 	@Bean
 	public RestClient restClient(OAuth2AuthorizedClientManager authorizedClientManager,
 			OAuth2AuthorizedClientRepository authorizedClientRepository,
-			@Value("${mockwebserver.url}") String baseUrl) {
+			@Value("${messages.base-url}") String baseUrl) {
 
 		OAuth2AuthorizationFailureHandler authorizationFailureHandler = authorizationFailureHandler(
 				authorizedClientRepository);

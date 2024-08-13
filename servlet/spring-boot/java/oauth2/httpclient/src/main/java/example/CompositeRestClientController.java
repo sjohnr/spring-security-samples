@@ -17,8 +17,6 @@
 package example;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
@@ -27,6 +25,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver;
+import org.springframework.security.oauth2.client.web.function.client.RequestAttributeClientRegistrationIdResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,21 +37,21 @@ import static org.springframework.security.oauth2.client.web.function.client.OAu
  * @author Steve Riesenberg
  */
 @Controller
-public class AuthenticationRequiredRestClientController {
+public class CompositeRestClientController {
 
 	private final RestClient restClient;
 
-	public AuthenticationRequiredRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
+	public CompositeRestClientController(OAuth2AuthorizedClientManager authorizedClientManager,
 			OAuth2AuthorizedClientRepository authorizedClientRepository,
 			@Value("${messages.base-url}") String baseUrl) {
 
 		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
-				authorizedClientManager, clientRegistrationIdResolver());
+				authorizedClientManager, clientRegistrationIdResolver(null));
 		requestInterceptor.setAuthorizationFailureHandler(authorizationFailureHandler(authorizedClientRepository));
 		this.restClient = RestClient.builder().baseUrl(baseUrl).requestInterceptor(requestInterceptor).build();
 	}
 
-	@GetMapping({ "/authentication-required/messages", "/public/authentication-required/messages" })
+	@GetMapping({ "/composite/messages", "/public/composite/messages" })
 	public String getMessages(Model model) {
 		// @formatter:off
 		Message[] messages = this.restClient.get()
@@ -65,21 +64,30 @@ public class AuthenticationRequiredRestClientController {
 	}
 
 	/**
-	 * This demonstrates a {@link ClientRegistrationIdResolver} that requires
-	 * authentication using OAuth 2.0 or Open ID Connect 1.0. If the user is not logged
-	 * in, they are sent to the login page prior to obtaining an access token.
+	 * This demonstrates a composite {@link ClientRegistrationIdResolver} that tries the
+	 * following ways of resolving a {@code clientRegistrationId}:
+	 * <ol>
+	 * <li>delegate to {@link RequestAttributeClientRegistrationIdResolver}</li>
+	 * <li>use (optional) default {@code clientRegistrationId}</li>
+	 * <li>use the {@code clientRegistrationId} from OAuth 2.0 or OpenID Connect 1.0
+	 * Login</li>
+	 * </ol>
+	 * @param defaultClientRegistrationId the default clientRegistrationId to use, or null
+	 * to fall back to using OAuth 2.0 or OpenID Connect 1.0 Login
 	 */
-	private static ClientRegistrationIdResolver clientRegistrationIdResolver() {
+	private static ClientRegistrationIdResolver clientRegistrationIdResolver(String defaultClientRegistrationId) {
+		RequestAttributeClientRegistrationIdResolver delegate = new RequestAttributeClientRegistrationIdResolver();
 		SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 		return (request) -> {
+			String clientRegistrationId = delegate.resolve(request);
+			if (clientRegistrationId == null) {
+				clientRegistrationId = defaultClientRegistrationId;
+			}
 			Authentication authentication = securityContextHolderStrategy.getContext().getAuthentication();
-			if (authentication instanceof OAuth2AuthenticationToken principal) {
+			if (clientRegistrationId == null && authentication instanceof OAuth2AuthenticationToken principal) {
 				return principal.getAuthorizedClientRegistrationId();
 			}
-			if (authentication instanceof AnonymousAuthenticationToken) {
-				throw new AccessDeniedException("Authentication is required");
-			}
-			throw new IllegalStateException("OAuth 2.0 or OpenID Connect 1.0 Login is required");
+			return clientRegistrationId;
 		};
 	}
 

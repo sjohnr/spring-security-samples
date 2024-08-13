@@ -16,6 +16,8 @@
 
 package example;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,9 +43,17 @@ public class OAuth2ResourceServerController {
 		return "secret message";
 	}
 
+	@GetMapping("/messages")
+	public List<Message> messages() {
+		return List.of(new Message("Hello"), new Message("Goodbye"));
+	}
+
 	@PostMapping("/message")
 	public String createMessage(@RequestBody String message) {
 		return String.format("Message was created. Content: %s", message);
+	}
+
+	public record Message(String message) {
 	}
 
 }

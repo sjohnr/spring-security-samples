@@ -37,11 +37,11 @@ public class RestClientController {
 		this.restClient = restClient;
 	}
 
-	@GetMapping(value = { "/messages", "/public/messages" })
+	@GetMapping({ "/messages", "/public/messages" })
 	public String getMessages(Model model) {
 		// @formatter:off
 		Message[] messages = this.restClient.get()
-			.uri("/api/v1/messages")
+			.uri("/messages")
 			.attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
 			.retrieve()
 			.body(Message[].class);

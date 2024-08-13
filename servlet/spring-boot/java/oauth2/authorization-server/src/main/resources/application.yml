@@ -33,6 +33,24 @@ spring:
                 - "openid"
                 - "profile"
             require-authorization-consent: true
+          login-client-with-messaging:
+            registration:
+              client-id: "login-client-with-messaging"
+              client-secret: "{noop}login-messages"
+              client-authentication-methods:
+                - "client_secret_basic"
+              authorization-grant-types:
+                - "authorization_code"
+                - "refresh_token"
+              redirect-uris:
+                - "http://127.0.0.1:8080/login/oauth2/code/login-client-with-messaging"
+                - "http://127.0.0.1:8080/authorized"
+              scopes:
+                - "openid"
+                - "profile"
+                - "message:read"
+                - "message:write"
+            require-authorization-consent: true
           messaging-client:
             registration:
               client-id: "messaging-client"

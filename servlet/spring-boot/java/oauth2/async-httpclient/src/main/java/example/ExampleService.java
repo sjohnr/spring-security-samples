@@ -37,10 +37,7 @@ public class ExampleService {
 
 	@Async
 	public Future<Message[]> hello() {
-		Message[] messages = this.restClient.get()
-			.uri("/api/v1/messages")
-			.retrieve()
-			.body(Message[].class);
+		Message[] messages = this.restClient.get().uri("/messages").retrieve().body(Message[].class);
 
 		return CompletableFuture.completedFuture(messages);
 	}
