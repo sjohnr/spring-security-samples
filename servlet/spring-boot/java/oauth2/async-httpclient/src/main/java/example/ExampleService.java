@@ -16,18 +16,22 @@
 
 package example;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import static org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId;
 
 /**
  * @author Steve Riesenberg
  */
 @Service
 public class ExampleService {
+
+	private static final String CLIENT_REGISTRATION_ID = "messaging-client";
 
 	private final RestClient restClient;
 
@@ -37,7 +41,11 @@ public class ExampleService {
 
 	@Async
 	public Future<Message[]> hello() {
-		Message[] messages = this.restClient.get().uri("/messages").retrieve().body(Message[].class);
+		Message[] messages = this.restClient.get()
+			.uri("/messages")
+			.attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
+			.retrieve()
+			.body(Message[].class);
 
 		return CompletableFuture.completedFuture(messages);
 	}

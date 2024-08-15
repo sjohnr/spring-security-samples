@@ -20,20 +20,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
+
+import static org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler;
 
 /**
  * @author Steve Riesenberg
  */
 @Configuration
 public class RestClientConfiguration {
-
-	private static final String CLIENT_REGISTRATION_ID = "messaging-client";
 
 	private final String baseUrl;
 
@@ -56,8 +57,9 @@ public class RestClientConfiguration {
 
 		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
 				authorizedClientManager);
-		requestInterceptor.setDefaultClientRegistrationId(CLIENT_REGISTRATION_ID);
-		requestInterceptor.setAuthorizedClientRepository(authorizedClientRepository);
+		OAuth2AuthorizationFailureHandler authorizationFailureHandler =
+				authorizationFailureHandler(authorizedClientRepository);
+		requestInterceptor.setAuthorizationFailureHandler(authorizationFailureHandler);
 
 		return builder.baseUrl(this.baseUrl).requestInterceptor(requestInterceptor).build();
 	}

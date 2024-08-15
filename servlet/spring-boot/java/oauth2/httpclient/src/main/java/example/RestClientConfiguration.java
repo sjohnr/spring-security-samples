@@ -22,10 +22,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
 
-import static org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler;
+import static org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler;
 
 /**
  * @author Steve Riesenberg

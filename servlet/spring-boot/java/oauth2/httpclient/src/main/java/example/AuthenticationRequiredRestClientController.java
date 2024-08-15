@@ -25,14 +25,14 @@ import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor;
-import org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestClient;
 
-import static org.springframework.security.oauth2.client.web.function.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler;
+import static org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler;
 
 /**
  * @author Steve Riesenberg
