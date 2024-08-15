@@ -57,8 +57,8 @@ public class RestClientConfiguration {
 
 		OAuth2ClientHttpRequestInterceptor requestInterceptor = new OAuth2ClientHttpRequestInterceptor(
 				authorizedClientManager);
-		OAuth2AuthorizationFailureHandler authorizationFailureHandler =
-				authorizationFailureHandler(authorizedClientRepository);
+		OAuth2AuthorizationFailureHandler authorizationFailureHandler = authorizationFailureHandler(
+				authorizedClientRepository);
 		requestInterceptor.setAuthorizationFailureHandler(authorizationFailureHandler);
 
 		return builder.baseUrl(this.baseUrl).requestInterceptor(requestInterceptor).build();

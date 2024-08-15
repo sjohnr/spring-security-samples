@@ -15,7 +15,7 @@
   -->
 
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>OAuth2 RestClient Showcase</title>
     <meta charset="utf-8" />
@@ -24,22 +24,9 @@
 
 <h1>Examples</h1>
 
-<h2>Attributes (per-request <code>clientRegistrationId</code>)</h2>
 <ul>
     <li><a href="/messages">Authenticated</a></li>
     <li><a href="/public/messages">Public</a></li>
-</ul>
-
-<h2>Authentication Required (per-user <code>clientRegistrationId</code>)</h2>
-<ul>
-    <li><a href="/authentication-required/messages">Authenticated</a></li>
-    <li><a href="/public/authentication-required/messages">Public</a></li>
-</ul>
-
-<h2>Composite (multiple ways of resolving <code>clientRegistrationId</code>)</h2>
-<ul>
-    <li><a href="/composite/messages">Authenticated</a></li>
-    <li><a href="/public/composite/messages">Public</a></li>
 </ul>
 
 </body>

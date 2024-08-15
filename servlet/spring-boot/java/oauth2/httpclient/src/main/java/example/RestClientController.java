@@ -42,6 +42,10 @@ public class RestClientController {
 		// @formatter:off
 		Message[] messages = this.restClient.get()
 			.uri("/messages")
+			/*
+			 * This demonstrates the default way of resolving the clientRegistrationId
+			 * through attributes. See RestClientConfiguration for trying another.
+			 */
 			.attributes(clientRegistrationId(CLIENT_REGISTRATION_ID))
 			.retrieve()
 			.body(Message[].class);
